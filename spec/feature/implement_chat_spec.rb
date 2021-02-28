@@ -6,39 +6,51 @@ feature 'implement chat' do
     visit('http://localhost:3000/sessions/new')
     expect(page).to have_content('Email')
     expect(page).to have_content('Password')
-    expect(page).to have_conteny('Sign up')
-    fill_in('Email', with: 'dfdfd')
-    fill_in('Password', with: 'fffff')
+    expect(page).to have_content('Log In')
+    expect(page).to have_content('Sign up')
     click_on('Sign up')
-    expect(page).to have_content('Welcome')
+    fill_in('Email', with: 'test@test.com')
+    fill_in('user_password', with: 'test')
+    fill_in('user_password_confirmation', with: 'test')
+    click_on('Log in')
+    expect(page).to have_content('Enter your message')
+  end
+
+  scenario 'Users must be able to log in providing a valid email address and password' do
+    visit('http://localhost:3000/sessions/new')
+    fill_in('Email', with: 'test@test.com')
+    fill_in('Password', with: 'test')
+    click_on('Log in')
+    expect(page).to have_content('Enter you message')
+  end
+
+  scenario 'Error message is displayed if invalid email address is entered' do
+    visit('http://localhost:3000/sessions/new')
+    fill_in('Email', with: 'dfdfd')
+    click_on('Log in')
+    expect(page).to have_content("Please include an '@' in the email address. 'dfdfd' is missing an '@'.")
   end
 
   scenario 'Once logged in users must be able to send and receive messages' do
     visit('http://localhost:3000/sessions/new')
-    fill_in('Email', with: 'dfdfd')
-    fill_in('Password', with: 'fffff')
-    click_on('Sign up')
-    fill_in('Message')
+    fill_in('Email', with: 'test@test.com')
+    fill_in('Password', with: 'test')
+    click_on('Log in')
+    fill_in('Enter your message', with: 'Hello')
     click_on('Send')
-    expect(page).to have_content('Message sent')
-    click_on('Receive message')
-    expect(page).to have_content('New message')
+    #I needed to refresh page to view messages
+    page.evaluate_script("window.location.reload()")
+    expect(page).to have_content("Hello")
   end
 
   scenario 'it has only one channel/room and all the users subscribed will have access to the only available channel' do
     visit('http://localhost:3000/sessions/new')
-    fill_in('Email', with: 'dfdfd')
-    fill_in('Password', with: 'fffff')
     click_on('Sign up')
-    expect(page).to have_content('Channel name')
-  end
-
-  scenario 'how many messages were sent and received in the last week' do
-
-  end
-
-  scenario 'the total number of messages received since the user has sent his last message' do
-
+    fill_in('Email', with: 'test1@test1.com')
+    fill_in('user_password', with: 'test1')
+    fill_in('user_password_confirmation', with: 'test1')
+    click_on('Log in')
+    expect(page).to have_content("Hello")
   end
 
 end
